@@ -1088,8 +1088,10 @@ async function createOnlineRoom() {
     const count = parseInt(document.getElementById('online-count-select').value);
     const questions = buildQuestions(mancheVal, count);
     const room = await api('/api/rooms', { method:'POST', body: JSON.stringify({ questions }) });
-    S.online = { role:'host', code:room.code, playerId:null, room, poll:null, lastStatus:null, answeredQ:-1 };
-    renderOnlineLobby(room);
+    const hostName = (document.getElementById('player-name').value || '').trim() || 'Hote';
+    const data = await api(`/api/rooms/${room.code}/join`, { method:'POST', body: JSON.stringify({ name: hostName }) });
+    S.online = { role:'host', code:room.code, playerId:data.player.id, room:data.room, poll:null, lastStatus:null, answeredQ:-1 };
+    renderOnlineLobby(data.room);
     showScreen('screen-online-lobby');
     startOnlinePoll();
   } catch(err) {
@@ -1151,7 +1153,7 @@ async function nextOnlineQuestion() {
 
 async function answerOnline(answer) {
   const room = S.online.room;
-  if(!room || S.online.role !== 'player' || room.status !== 'question' || room.myAnswer) return;
+  if(!room || !S.online.playerId || room.status !== 'question' || room.myAnswer) return;
   try {
     const next = await api(`/api/rooms/${S.online.code}/answer`, {
       method:'POST',
@@ -1196,7 +1198,7 @@ function renderOnlineQuestion(room) {
   const badge = document.getElementById('online-q-badge');
   badge.className = `badge ${q.mBadge}`;
   badge.textContent = q.mName;
-  document.getElementById('online-my-score').textContent = S.online.role === 'host' ? `${room.answeredCount}/${room.players.length}` : `${(me && me.score) || 0} pts`;
+  document.getElementById('online-my-score').textContent = S.online.role === 'host' ? `${(me && me.score) || 0} pts · ${room.answeredCount}/${room.players.length}` : `${(me && me.score) || 0} pts`;
   document.getElementById('online-answer-count').textContent = `${room.answeredCount}/${room.players.length} reponses`;
   document.getElementById('online-host-controls').style.display = S.online.role === 'host' ? '' : 'none';
   document.querySelector('#online-host-controls .btn-primary').textContent = room.currentQ >= room.total - 1 ? 'Voir les resultats' : 'Question suivante';
@@ -1211,11 +1213,11 @@ function renderOnlineQuestion(room) {
     const cls = ['ans-a','ans-b','ans-c','ans-d'];
     container.innerHTML = `<div class="ans-grid">${q.answers.map((a,i) => {
       const isCorrect = room.status === 'reveal' && i === q.correct;
-      const disabled = S.online.role === 'host' || answered || room.status === 'reveal';
+      const disabled = !S.online.playerId || answered || room.status === 'reveal';
       return `<button class="ans-btn ${cls[i]} ${isCorrect ? 'ans-correct' : ''}" ${disabled ? 'disabled' : ''} onclick="answerOnline(${i})">${escapeHTML(a)}</button>`;
     }).join('')}</div>`;
   } else if(q.mType === 'tf') {
-    const disabled = S.online.role === 'host' || answered || room.status === 'reveal';
+    const disabled = !S.online.playerId || answered || room.status === 'reveal';
     container.innerHTML = `<div class="tf-grid">
       <button class="tf-btn tf-vrai ${room.status === 'reveal' && q.correct ? 'ans-correct' : ''}" ${disabled ? 'disabled' : ''} onclick="answerOnline(true)">Vrai</button>
       <button class="tf-btn tf-faux ${room.status === 'reveal' && !q.correct ? 'ans-correct' : ''}" ${disabled ? 'disabled' : ''} onclick="answerOnline(false)">Faux</button>
@@ -1259,7 +1261,7 @@ function startOnlineTimer(room) {
     if(S.timeLeft <= 5) document.getElementById('online-timer-wrap').classList.add('timer-low');
     if(S.timeLeft <= 0) {
       clearInterval(S.timerInterval);
-      if(S.online.role === 'player') answerOnline(null);
+      if(S.online.playerId && !S.online.room.myAnswer) answerOnline(null);
       if(S.online.role === 'host') revealOnlineRoom();
     }
   }, 1000);
