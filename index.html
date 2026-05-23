@@ -331,17 +331,17 @@
       <div class="manche-icon">🧠</div>
       <div class="manche-info">
         <div class="manche-name">Niveau Cerveau</div>
-        <div class="manche-desc">25 questions ouvertes · réflexion</div>
+        <div class="manche-desc">25 QCM · réflexion</div>
       </div>
-      <span class="badge badge-teal">OPEN</span>
+      <span class="badge badge-teal">QCM</span>
     </div>
     <div class="manche-item">
-      <div class="manche-icon">😭</div>
+      <div class="manche-icon">💡</div>
       <div class="manche-info">
         <div class="manche-name">Certitudes</div>
-        <div class="manche-desc">27 questions qui surprennent</div>
+        <div class="manche-desc">27 QCM qui surprennent</div>
       </div>
-      <span class="badge badge-amber">OPEN</span>
+      <span class="badge badge-amber">QCM</span>
     </div>
   </div>
 
@@ -663,7 +663,7 @@ const MANCHES = [
     ]
   },
   {
-    name:"Cerveau 🧠", badge:"badge-teal", type:"open",
+    name:"Cerveau 🧠", badge:"badge-teal", type:"qcm",
     questions:[
       {q:"Pourquoi le ciel devient-il rouge au coucher du soleil ?",correct:"Diffusion de Rayleigh",expl:"La lumière traverse plus d'atmosphère. Les courtes longueurs d'onde (bleu) sont dispersées, laissant le rouge."},
       {q:"Quelle civilisation a développé le concept du zéro comme nombre ?",correct:"Civilisation indienne",expl:"Brahmagupta (~628 apr. J.-C.) formalisa le zéro comme nombre à part entière."},
@@ -693,7 +693,7 @@ const MANCHES = [
     ]
   },
   {
-    name:"Certitudes 😭", badge:"badge-amber", type:"open",
+    name:"Certitudes 😭", badge:"badge-amber", type:"qcm",
     questions:[
       {q:"Quel pays possède le plus de fuseaux horaires ?",correct:"France (12 fuseaux avec ses territoires)",expl:"Grâce à ses territoires d'outre-mer, la France couvre 12 fuseaux horaires."},
       {q:"Quel est l'animal le plus meurtrier pour l'humain ?",correct:"Le moustique",expl:"Il cause plus de 700 000 morts/an via le paludisme, la dengue, etc."},
@@ -809,15 +809,38 @@ function removePlayer(i) { S.players.splice(i,1); renderPlayers(); }
 
 function shuffle(arr) { return [...arr].sort(() => Math.random()-0.5); }
 
+function buildAutoChoices(correctText, pool, seed) {
+  const distractors = pool.filter(item => item !== correctText);
+  const answers = [correctText];
+  let offset = seed % Math.max(1, distractors.length);
+  while(answers.length < 4 && distractors.length) {
+    const next = distractors[offset % distractors.length];
+    if(!answers.includes(next)) answers.push(next);
+    offset++;
+  }
+  const correctSlot = (seed * 7) % answers.length;
+  const ordered = answers.filter(item => item !== correctText);
+  ordered.splice(correctSlot, 0, correctText);
+  return { answers: ordered, correct: ordered.indexOf(correctText), correctText };
+}
+
+function prepareQuestion(q, m, qi) {
+  const base = {...q};
+  if(m.type === 'qcm' && !base.answers) {
+    Object.assign(base, buildAutoChoices(base.correct, m.questions.map(item => item.correct), qi));
+  }
+  return base;
+}
+
 function buildQuestions(mancheVal, count) {
   let qs = [];
   if(mancheVal === 'all') {
-    MANCHES.forEach((m,mi) => qs.push(...m.questions.map(q => ({...q, mType:m.type, mIdx:mi, mBadge:m.badge, mName:m.name}))));
+    MANCHES.forEach((m,mi) => qs.push(...m.questions.map((q,qi) => ({...prepareQuestion(q, m, qi), mType:m.type, mIdx:mi, mBadge:m.badge, mName:m.name}))));
     qs = shuffle(qs);
   } else {
     const mi = parseInt(mancheVal);
     const m = MANCHES[mi];
-    qs = shuffle(m.questions).map(q => ({...q, mType:m.type, mIdx:mi, mBadge:m.badge, mName:m.name}));
+    qs = shuffle(m.questions.map((q,qi) => prepareQuestion(q, m, qi))).map(q => ({...q, mType:m.type, mIdx:mi, mBadge:m.badge, mName:m.name}));
   }
   return qs.slice(0, Math.min(count, qs.length));
 }
