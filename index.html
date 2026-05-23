@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a0a3e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Quiz AGAPE">
+<title>Quiz AGAPE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --purple: #7c3aed;
+    --purple-light: #c4b5fd;
+    --purple-dark: #1f1444;
+    --purple-mid: #31205e;
+    --green: #22c55e;
+    --red: #f43f5e;
+    --amber: #f59e0b;
+    --pink: #ec4899;
+    --teal: #06b6d4;
+    --blue: #3b82f6;
+    --bg: #070912;
+    --surface: rgba(255,255,255,0.07);
+    --surface-hover: rgba(255,255,255,0.12);
+    --surface-strong: rgba(255,255,255,0.14);
+    --border: rgba(255,255,255,0.12);
+    --border-strong: rgba(255,255,255,0.2);
+    --text: #f8fafc;
+    --muted: rgba(226,232,240,0.68);
+    --shadow: 0 18px 60px rgba(0,0,0,0.35);
+    --radius: 8px;
+    --radius-sm: 6px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { min-height: 100%; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; }
+  html { overflow-x: hidden; }
+  body { overflow-x: hidden; }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      linear-gradient(135deg, rgba(6,182,212,0.14), transparent 34%),
+      radial-gradient(ellipse 70% 45% at 50% -18%, rgba(124,58,237,0.28) 0%, transparent 70%),
+      radial-gradient(ellipse 52% 36% at 94% 94%, rgba(34,197,94,0.13) 0%, transparent 65%);
+    pointer-events: none; z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+    background-size: 42px 42px;
+    mask-image: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent 75%);
+    pointer-events: none; z-index: 0;
+  }
+
+  #app { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; width: min(100%, 1120px); margin: 0 auto; }
+
+  .screen { display: none; flex-direction: column; min-height: 100vh; overflow-y: auto; padding: 22px 18px 34px; width: min(100%, 560px); margin: 0 auto; }
+  .screen.active { display: flex; animation: fadeIn 0.25s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* --- TYPOGRAPHY --- */
+  .font-display { font-family: 'Syne', sans-serif; }
+  h1 { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; line-height: 1.2; }
+  h2 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; }
+  h3 { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 600; }
+  p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+  /* --- LOGO --- */
+  .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .logo-icon { width: 46px; height: 46px; background: linear-gradient(135deg, #14b8a6, #7c3aed 55%, #ec4899); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; box-shadow: 0 12px 32px rgba(6,182,212,0.22); }
+  .logo-text { font-family: 'Syne', sans-serif; font-size: 23px; font-weight: 800; background: linear-gradient(135deg, #f8fafc, #67e8f9 58%, #f9a8d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+  /* --- BADGES --- */
+  .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 99px; font-size: 12px; font-weight: 600; font-family: 'Syne', sans-serif; }
+  .badge-purple { background: rgba(124,58,237,0.25); color: #c4b5fd; border: 1px solid rgba(124,58,237,0.4); }
+  .badge-teal { background: rgba(6,182,212,0.2); color: #67e8f9; border: 1px solid rgba(6,182,212,0.3); }
+  .badge-amber { background: rgba(245,158,11,0.2); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); }
+  .badge-pink { background: rgba(236,72,153,0.2); color: #f9a8d4; border: 1px solid rgba(236,72,153,0.3); }
+
+  /* --- CARDS --- */
+  .card { background: linear-gradient(180deg, var(--surface), rgba(255,255,255,0.045)); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; box-shadow: 0 1px 0 rgba(255,255,255,0.05) inset; }
+  .card-glow { box-shadow: var(--shadow); border-color: var(--border-strong); }
+
+  /* --- BUTTONS --- */
+  .btn { width: 100%; padding: 15px; border-radius: var(--radius); border: none; font-size: 15px; font-weight: 700; font-family: 'Syne', sans-serif; cursor: pointer; transition: transform 0.16s ease, opacity 0.16s ease, box-shadow 0.16s ease, background 0.16s ease; position: relative; overflow: hidden; min-height: 50px; }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary { background: linear-gradient(135deg, #06b6d4, #7c3aed 58%, #ec4899); color: #fff; box-shadow: 0 12px 32px rgba(6,182,212,0.18), 0 10px 26px rgba(124,58,237,0.22); }
+  .btn-primary:hover { box-shadow: 0 18px 42px rgba(6,182,212,0.24), 0 14px 34px rgba(124,58,237,0.3); transform: translateY(-1px); }
+  .btn-ghost { background: rgba(255,255,255,0.075); border: 1px solid var(--border); color: var(--text); }
+  .btn-ghost:hover { background: var(--surface-hover); border-color: var(--border-strong); }
+  .btn-danger { background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; }
+  .btn + .btn { margin-top: 10px; }
+  .btn-sm { padding: 10px 16px; font-size: 13px; width: auto; }
+
+  /* --- INPUTS --- */
+  input[type=text], select { width: 100%; min-height: 48px; padding: 13px 16px; background: rgba(7,9,18,0.52); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: 15px; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s, box-shadow 0.2s, background 0.2s; -webkit-appearance: none; appearance: none; }
+  input[type=text]:focus, select:focus { border-color: #67e8f9; box-shadow: 0 0 0 4px rgba(6,182,212,0.14); background: rgba(7,9,18,0.72); }
+  input[type=text]::placeholder { color: var(--muted); }
+  select option { background: #1a0a3e; color: var(--text); }
+
+  /* --- TABS --- */
+  .tabs { display: flex; background: rgba(255,255,255,0.055); border: 1px solid var(--border); border-radius: var(--radius); padding: 4px; gap: 4px; margin-bottom: 16px; backdrop-filter: blur(12px); }
+  .tab { flex: 1; padding: 10px; border-radius: 8px; border: none; font-size: 13px; font-weight: 600; font-family: 'Syne', sans-serif; cursor: pointer; transition: all 0.2s; background: none; color: var(--muted); }
+  .tab.active { background: linear-gradient(135deg, rgba(6,182,212,0.88), rgba(124,58,237,0.9)); color: #fff; box-shadow: 0 6px 18px rgba(6,182,212,0.16); }
+
+  /* --- TIMER --- */
+  .timer-wrap { position: relative; margin-bottom: 14px; }
+  .timer-bar-bg { height: 8px; background: rgba(255,255,255,0.08); border-radius: 99px; overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,0.28); }
+  .timer-bar-fill { height: 100%; background: linear-gradient(90deg, var(--purple), var(--teal)); border-radius: 99px; transition: width 0.1s linear; }
+  .timer-label { position: absolute; right: 0; top: -22px; font-size: 13px; font-family: 'Syne', sans-serif; font-weight: 700; color: var(--purple-light); }
+
+  /* --- QUESTION CARD --- */
+  .question-card { background: linear-gradient(135deg, rgba(6,182,212,0.14), rgba(124,58,237,0.13)); border: 1px solid rgba(103,232,249,0.24); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; box-shadow: 0 14px 36px rgba(0,0,0,0.2); }
+  .question-text { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; line-height: 1.45; color: var(--text); overflow-wrap: anywhere; }
+
+  /* --- ANSWER BUTTONS --- */
+  .ans-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .ans-btn {
+    padding: 16px 12px; border-radius: var(--radius); border: 1px solid var(--border);
+    font-size: 14px; font-weight: 600; font-family: 'Syne', sans-serif;
+    cursor: pointer; transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease;
+    min-height: 72px; display: flex; align-items: center; justify-content: center;
+    text-align: center; line-height: 1.3; overflow-wrap: anywhere; box-shadow: 0 10px 24px rgba(0,0,0,0.16);
+  }
+  .ans-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
+  .ans-btn:active { transform: scale(0.98); }
+  .ans-a { background: linear-gradient(135deg, rgba(124,58,237,0.35), rgba(79,70,229,0.18)); border-color: rgba(167,139,250,0.55); color: #ddd6fe; }
+  .ans-b { background: linear-gradient(135deg, rgba(6,182,212,0.31), rgba(59,130,246,0.15)); border-color: rgba(103,232,249,0.5); color: #cffafe; }
+  .ans-c { background: linear-gradient(135deg, rgba(245,158,11,0.31), rgba(234,179,8,0.14)); border-color: rgba(252,211,77,0.48); color: #fef3c7; }
+  .ans-d { background: linear-gradient(135deg, rgba(236,72,153,0.3), rgba(244,63,94,0.14)); border-color: rgba(249,168,212,0.48); color: #fce7f3; }
+  .ans-btn.ans-correct { background: rgba(16,185,129,0.25); border-color: rgba(16,185,129,0.6); color: #6ee7b7; box-shadow: 0 0 20px rgba(16,185,129,0.3); }
+  .ans-btn.ans-wrong { opacity: 0.35; }
+  .ans-btn.ans-reveal { opacity: 0.35; }
+  .ans-btn:disabled { cursor: default; }
+
+  /* --- TF BUTTONS --- */
+  .tf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .tf-btn { padding: 24px; border-radius: var(--radius); border: 1px solid; font-size: 20px; font-weight: 800; font-family: 'Syne', sans-serif; cursor: pointer; transition: transform 0.14s ease, filter 0.14s ease; min-height: 96px; }
+  .tf-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
+  .tf-btn:active { transform: scale(0.98); }
+  .tf-vrai { background: linear-gradient(135deg, rgba(34,197,94,0.25), rgba(16,185,129,0.12)); border-color: rgba(74,222,128,0.5); color: #bbf7d0; }
+  .tf-faux { background: linear-gradient(135deg, rgba(244,63,94,0.25), rgba(239,68,68,0.12)); border-color: rgba(251,113,133,0.5); color: #ffe4e6; }
+  .tf-btn.ans-correct { box-shadow: 0 0 20px rgba(16,185,129,0.4); }
+  .tf-btn.ans-reveal { opacity: 0.3; }
+  .tf-btn:disabled { cursor: default; }
+
+  /* --- RESULT BANNER --- */
+  .result-banner { border-radius: var(--radius); padding: 20px; text-align: center; margin-bottom: 12px; }
+  .result-banner.correct { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.4); }
+  .result-banner.wrong { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); }
+  .result-banner.neutral { background: var(--surface); border: 1px solid var(--border); }
+  .result-pts { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; }
+  .result-banner.correct .result-pts { color: #6ee7b7; }
+  .result-banner.wrong .result-pts { color: #fca5a5; }
+  .result-label { font-size: 14px; margin-top: 4px; font-weight: 500; }
+  .result-banner.correct .result-label { color: #a7f3d0; }
+  .result-banner.wrong .result-label { color: #fecaca; }
+
+  /* --- PLAYERS --- */
+  .player-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .avatar { width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; font-family: 'Syne', sans-serif; flex-shrink: 0; box-shadow: 0 8px 18px rgba(0,0,0,0.18); }
+  .score-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .medal { font-size: 22px; width: 32px; text-align: center; }
+
+  /* --- PLAYER TURN --- */
+  .turn-card { display: flex; align-items: center; gap: 12px; background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.3); border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 12px; }
+
+  /* --- MANCHE HEADER --- */
+  .manche-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+
+  /* --- HUD --- */
+  .hud { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .hud-score { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--purple-light); }
+
+  /* --- OPEN REVEAL --- */
+  .reveal-answer { background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); border-radius: var(--radius); padding: 16px; text-align: center; margin-bottom: 12px; }
+  .reveal-answer .ans-val { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: #fcd34d; margin-top: 4px; }
+
+  /* --- EXPL CARD --- */
+  .expl-card { background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 12px; }
+  .expl-card p { font-size: 13px; color: var(--muted); }
+
+  /* --- WELCOME HERO --- */
+  .hero { padding: 28px 0 20px; }
+  .hero-sub { font-size: 14px; color: var(--muted); margin-top: 6px; }
+  .manche-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+  .manche-item { display: flex; align-items: center; gap: 12px; background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.045)); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.14); }
+  .manche-icon { font-size: 20px; width: 36px; height: 36px; display:flex; align-items:center; justify-content:center; text-align: center; background: rgba(255,255,255,0.08); border-radius: 8px; }
+  .manche-info { flex: 1; }
+  .manche-name { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--text); }
+  .manche-desc { font-size: 12px; color: var(--muted); }
+
+  /* --- LABEL --- */
+  .label { font-size: 12px; font-weight: 600; font-family: 'Syne', sans-serif; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block; }
+
+  /* --- SCROLLBAR --- */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(124,58,237,0.3); border-radius: 99px; }
+
+  /* PWA safe area */
+  .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
+
+  /* --- MORT SUBITE --- */
+  .ms-q { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); line-height: 1.45; }
+  .ms-a { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: #fcd34d; margin-top: 8px; }
+
+  /* --- FORM SPACING --- */
+  .form-group { margin-bottom: 12px; }
+
+  /* --- ONLINE ROOMS --- */
+  .join-code { font-family: 'Syne', sans-serif; font-size: 42px; font-weight: 800; letter-spacing: 0.12em; text-align: center; color: #67e8f9; margin: 10px 0 4px; }
+  .online-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .online-actions .btn { margin-top: 0; }
+  .mini-leader { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+  .mini-player { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .answer-count { text-align: center; font-family: 'Syne', sans-serif; font-weight: 700; color: var(--purple-light); margin: 10px 0; }
+  .waiting-panel { text-align: center; padding: 22px 14px; }
+
+  /* --- RESPONSIVE POLISH --- */
+  @media (min-width: 760px) {
+    .screen { width: min(100%, 720px); padding: 34px 28px 48px; }
+    #screen-welcome { width: min(100%, 1040px); display: none; grid-template-columns: 1.04fr 0.96fr; grid-template-areas: "hero setup" "list setup"; column-gap: 28px; align-content: center; }
+    #screen-welcome.active { display: grid; }
+    #screen-welcome .hero { grid-area: hero; padding-top: 4px; align-self: end; }
+    #screen-welcome .manche-list { grid-area: list; margin-bottom: 0; }
+    #screen-welcome .tabs,
+    #screen-welcome #solo-setup,
+    #screen-welcome #multi-setup {
+      grid-area: setup;
+      width: 100%;
+    }
+    #screen-welcome .tabs { align-self: start; }
+    #screen-welcome #solo-setup,
+    #screen-welcome #multi-setup {
+      align-self: center;
+      background: linear-gradient(180deg, rgba(255,255,255,0.09), rgba(255,255,255,0.045));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+      margin-top: 70px;
+    }
+    .hero { padding-top: 38px; }
+    h1 { font-size: 34px; }
+    .logo-text { font-size: 28px; }
+    .hero-sub { font-size: 15px; max-width: 520px; }
+    .manche-list { display: grid; grid-template-columns: 1fr 1fr; }
+    .question-card { padding: 28px; }
+    .question-text { font-size: 24px; }
+    .ans-grid { gap: 14px; }
+    .ans-btn { min-height: 96px; font-size: 16px; padding: 18px; }
+    .hud { margin-bottom: 18px; }
+    .card { padding: 18px 20px; }
+  }
+
+  @media (min-width: 1040px) {
+    #screen-question,
+    #screen-online-question {
+      width: min(100%, 880px);
+      justify-content: center;
+    }
+    #screen-results,
+    #screen-online-lobby,
+    #screen-join {
+      width: min(100%, 720px);
+      justify-content: center;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .screen { padding: 18px 14px 28px; }
+    .ans-grid { grid-template-columns: 1fr; }
+    .tf-grid { grid-template-columns: 1fr; }
+    .online-actions { grid-template-columns: 1fr; }
+    .join-code { font-size: 34px; }
+    .hud { gap: 8px; flex-wrap: wrap; }
+    .hud-score { width: 100%; text-align: right; }
+    .question-text { font-size: 16px; }
+    .btn { min-height: 48px; }
+  }
+
+  /* PULSE animation for timer low */
+  @keyframes pulse-red { 0%,100% { opacity:1; } 50% { opacity:0.6; } }
+  .timer-low .timer-bar-fill { background: var(--red); animation: pulse-red 0.6s infinite; }
+  .timer-low .timer-label { color: #fca5a5; }
+
+  @keyframes pop { 0% { transform: scale(0.8); opacity: 0; } 80% { transform: scale(1.05); } 100% { transform: scale(1); opacity: 1; } }
+  .pop { animation: pop 0.3s ease forwards; }
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ======================== WELCOME ======================== -->
+<div id="screen-welcome" class="screen active">
+  <div class="hero">
+    <div class="logo">
+      <div class="logo-icon"></div>
+      <div class="logo-text">Quiz AGAPE</div>
+    </div>
+    <p class="hero-sub">Culture générale · Style Kahoot · 120 questions</p>
+  </div>
+
+  <div class="manche-list">
+    <div class="manche-item">
+      <div class="manche-icon">⚡</div>
+      <div class="manche-info">
+        <div class="manche-name">Rapide</div>
+        <div class="manche-desc">30 QCM · 20 secondes chacune</div>
+      </div>
+      <span class="badge badge-purple">QCM</span>
+    </div>
+    <div class="manche-item">
+      <div class="manche-icon">🔥</div>
+      <div class="manche-info">
+        <div class="manche-name">Vrai ou Faux</div>
+        <div class="manche-desc">30 questions · avec explications</div>
+      </div>
+      <span class="badge badge-pink">V/F</span>
+    </div>
+    <div class="manche-item">
+      <div class="manche-icon">🧠</div>
+      <div class="manche-info">
+        <div class="manche-name">Niveau Cerveau</div>
+        <div class="manche-desc">25 questions ouvertes · réflexion</div>
+      </div>
+      <span class="badge badge-teal">OPEN</span>
+    </div>
+    <div class="manche-item">
+      <div class="manche-icon">😭</div>
+      <div class="manche-info">
+        <div class="manche-name">Certitudes</div>
+        <div class="manche-desc">27 questions qui surprennent</div>
+      </div>
+      <span class="badge badge-amber">OPEN</span>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" id="tab-solo" onclick="setMode('solo')">Solo</button>
+    <button class="tab" id="tab-multi" onclick="setMode('multi')">Multijoueur</button>
+  </div>
+
+  <div id="solo-setup">
+    <div class="form-group">
+      <span class="label">Ton prénom</span>
+      <input type="text" id="player-name" placeholder="Ex: Thomas" maxlength="20" />
+    </div>
+    <div class="form-group">
+      <span class="label">Manche</span>
+      <select id="manche-select">
+        <option value="0">⚡ Manche 1 — Rapide</option>
+        <option value="1">🔥 Manche 2 — Vrai ou Faux</option>
+        <option value="2">🧠 Manche 3 — Niveau Cerveau</option>
+        <option value="3">😭 Manche 4 — Certitudes</option>
+        <option value="all">🎲 Toutes les manches mélangées</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <span class="label">Nombre de questions</span>
+      <select id="count-select">
+        <option value="10">10 questions</option>
+        <option value="15">15 questions</option>
+        <option value="20">20 questions</option>
+        <option value="30">Toutes (30)</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" onclick="startSolo()">🚀 Jouer !</button>
+  </div>
+
+  <div id="multi-setup" style="display:none;">
+    <div class="card card-glow" style="margin-bottom:16px;">
+      <h2 style="margin-bottom:8px;">Partie en ligne</h2>
+      <p style="margin-bottom:12px;">Un joueur cree la partie, les autres rejoignent avec le code.</p>
+      <div class="form-group">
+        <span class="label">Manche en ligne</span>
+        <select id="online-manche-select">
+          <option value="0">Manche 1 - Rapide</option>
+          <option value="1">Manche 2 - Vrai ou Faux</option>
+          <option value="2">Manche 3 - Niveau Cerveau</option>
+          <option value="3">Manche 4 - Certitudes</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <span class="label">Nombre de questions</span>
+        <select id="online-count-select">
+          <option value="10">10 questions</option>
+          <option value="15">15 questions</option>
+          <option value="20">20 questions</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="createOnlineRoom()">Creer une partie</button>
+      <div class="online-actions">
+        <input type="text" id="join-code" placeholder="Code" maxlength="6" inputmode="numeric" />
+        <button class="btn btn-ghost" onclick="showScreen('screen-join')">Rejoindre</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:12px;">
+      <h2 style="margin-bottom:8px;">Mode local</h2>
+      <p style="margin-bottom:12px;">Pour jouer sur un seul telephone, chacun son tour.</p>
+    </div>
+    <div class="form-group">
+      <span class="label">Joueurs</span>
+      <div id="player-list" style="margin-bottom:10px;"></div>
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="new-player" placeholder="Ajouter un joueur..." maxlength="15" style="flex:1;" onkeydown="if(event.key==='Enter')addPlayer()" />
+        <button onclick="addPlayer()" style="background: var(--purple); border:none; border-radius:var(--radius-sm); padding: 0 16px; cursor:pointer; font-size:20px; color:#fff; flex-shrink:0;">+</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <span class="label">Manche</span>
+      <select id="manche-select-multi">
+        <option value="0">⚡ Manche 1 — Rapide</option>
+        <option value="1">🔥 Manche 2 — Vrai ou Faux</option>
+        <option value="2">🧠 Manche 3 — Niveau Cerveau</option>
+        <option value="3">😭 Manche 4 — Certitudes</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <span class="label">Nombre de questions</span>
+      <select id="count-select-multi">
+        <option value="10">10 questions</option>
+        <option value="15">15 questions</option>
+        <option value="20">20 questions</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" onclick="startMulti()">🚀 Démarrer</button>
+  </div>
+</div>
+
+<!-- ======================== JOIN ONLINE ======================== -->
+<div id="screen-join" class="screen">
+  <div class="hero">
+    <div class="logo">
+      <div class="logo-icon">🎯</div>
+      <div class="logo-text">Rejoindre</div>
+    </div>
+    <p class="hero-sub">Entre le code affiche par l'hote.</p>
+  </div>
+  <div class="form-group">
+    <span class="label">Ton prenom</span>
+    <input type="text" id="online-player-name" placeholder="Ex: Sara" maxlength="18" />
+  </div>
+  <div class="form-group">
+    <span class="label">Code de partie</span>
+    <input type="text" id="online-room-code" placeholder="123456" maxlength="6" inputmode="numeric" />
+  </div>
+  <button class="btn btn-primary" onclick="joinOnlineRoom()">Entrer dans la partie</button>
+  <button class="btn btn-ghost" onclick="showScreen('screen-welcome')">Retour</button>
+</div>
+
+<!-- ======================== ONLINE LOBBY ======================== -->
+<div id="screen-online-lobby" class="screen">
+  <div class="hero">
+    <div class="logo">
+      <div class="logo-icon">🎯</div>
+      <div class="logo-text" id="online-lobby-title">Salle</div>
+    </div>
+    <p class="hero-sub" id="online-lobby-sub">Les joueurs peuvent maintenant rejoindre.</p>
+  </div>
+  <div class="card card-glow" style="margin-bottom:16px;">
+    <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); font-weight:600; text-align:center;">Code de partie</div>
+    <div class="join-code" id="online-room-display">------</div>
+  </div>
+  <div class="card" style="margin-bottom:16px;">
+    <h2>Joueurs connectes</h2>
+    <div id="online-player-list" class="mini-leader"></div>
+  </div>
+  <button class="btn btn-primary" id="online-start-btn" onclick="startOnlineRoom()">Demarrer</button>
+  <button class="btn btn-ghost" onclick="goHome()">Quitter</button>
+</div>
+
+<!-- ======================== ONLINE QUESTION ======================== -->
+<div id="screen-online-question" class="screen">
+  <div class="hud">
+    <span id="online-q-counter" class="badge badge-purple">Q 1/10</span>
+    <span id="online-q-badge" class="badge badge-teal"></span>
+    <span id="online-my-score" class="hud-score">0 pts</span>
+  </div>
+  <div class="timer-wrap" id="online-timer-wrap">
+    <div class="timer-label" id="online-timer-label">20</div>
+    <div class="timer-bar-bg"><div class="timer-bar-fill" id="online-timer-fill" style="width:100%;"></div></div>
+  </div>
+  <div class="question-card">
+    <p class="question-text" id="online-q-text"></p>
+  </div>
+  <div id="online-answers-container"></div>
+  <div class="answer-count" id="online-answer-count">0 reponse</div>
+  <div id="online-host-controls" style="display:none;">
+    <button class="btn btn-ghost" onclick="revealOnlineRoom()">Afficher les reponses</button>
+    <button class="btn btn-primary" onclick="nextOnlineQuestion()">Question suivante</button>
+  </div>
+</div>
+
+<!-- ======================== ONLINE WAIT ======================== -->
+<div id="screen-online-wait" class="screen">
+  <div class="waiting-panel">
+    <div style="font-size:56px; margin-bottom:10px;">⏳</div>
+    <h1 id="online-wait-title">En attente...</h1>
+    <p id="online-wait-sub" style="margin-top:8px;">L'hote prepare la suite.</p>
+  </div>
+  <div class="card">
+    <div id="online-wait-board" class="mini-leader"></div>
+  </div>
+</div>
+
+<!-- ======================== QUESTION ======================== -->
+<div id="screen-question" class="screen">
+  <div class="hud">
+    <span id="q-counter" class="badge badge-purple">Q 1/10</span>
+    <span id="q-manche-badge" class="badge badge-teal"></span>
+    <span id="q-score" class="hud-score">0 pts</span>
+  </div>
+  <div class="timer-wrap" id="timer-wrap">
+    <div class="timer-label" id="timer-label">20</div>
+    <div class="timer-bar-bg"><div class="timer-bar-fill" id="timer-fill" style="width:100%;"></div></div>
+  </div>
+  <div id="turn-card-wrap" style="display:none;">
+    <div class="turn-card">
+      <div class="avatar" id="turn-avatar"></div>
+      <div>
+        <div style="font-size:11px; color:var(--muted);">Tour de</div>
+        <div style="font-family:'Syne',sans-serif; font-size:15px; font-weight:700;" id="turn-name"></div>
+      </div>
+    </div>
+  </div>
+  <div class="question-card">
+    <p class="question-text" id="q-text"></p>
+  </div>
+  <div id="answers-container"></div>
+  <div id="feedback-area" style="display:none; margin-top: 12px;">
+    <div class="result-banner" id="result-banner">
+      <div class="result-pts" id="result-pts"></div>
+      <div class="result-label" id="result-label"></div>
+    </div>
+    <div class="expl-card" id="expl-card" style="display:none;">
+      <p id="expl-text"></p>
+    </div>
+    <button class="btn btn-primary" id="next-btn" onclick="nextQuestion()">Question suivante →</button>
+  </div>
+</div>
+
+<!-- ======================== RESULTS ======================== -->
+<div id="screen-results" class="screen">
+  <div style="text-align:center; padding: 24px 0 16px;">
+    <div style="font-size:56px; margin-bottom:10px;" id="trophy-emoji">🏆</div>
+    <h1 id="results-title"></h1>
+    <p id="results-sub" style="margin-top:6px;"></p>
+  </div>
+  <div class="card card-glow" style="margin-bottom:16px;">
+    <div id="leaderboard"></div>
+  </div>
+  <div id="stats-zone"></div>
+  <button class="btn btn-primary" onclick="goHome()">🔄 Rejouer</button>
+  <button class="btn btn-ghost" onclick="goMortSubite()" style="margin-top:10px;">☠️ Mort Subite</button>
+</div>
+
+<!-- ======================== MORT SUBITE ======================== -->
+<div id="screen-mort-subite" class="screen">
+  <div style="text-align:center; margin-bottom:20px;">
+    <span class="badge badge-pink" style="font-size:15px; padding:8px 18px;">☠️ Mort Subite</span>
+    <p style="margin-top:10px; font-size:14px;">Premier qui répond correctement gagne le point !</p>
+  </div>
+  <div class="card card-glow" style="margin-bottom:16px; padding:22px;">
+    <p class="ms-q" id="ms-q"></p>
+  </div>
+  <div id="ms-answer-wrap" style="display:none;" class="reveal-answer">
+    <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); font-weight:600;">Réponse</div>
+    <div class="ms-a" id="ms-a"></div>
+  </div>
+  <div style="display:flex; gap:10px; margin-bottom:12px;">
+    <button class="btn btn-ghost" onclick="revealMS()" style="flex:1;">👁 Révéler</button>
+    <button class="btn btn-primary" onclick="nextMS()" style="flex:1;">Suivant →</button>
+  </div>
+  <button class="btn btn-danger" onclick="showScreen('screen-results')">← Retour aux résultats</button>
+</div>
+
+</div><!-- #app -->
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const MANCHES = [
+  {
+    name:"Rapide ⚡", badge:"badge-purple", type:"qcm",
+    questions:[
+      {q:"Quel est le plus grand désert du monde ?",answers:["Sahara","Arctique","Kalahari","Antarctique"],correct:3},
+      {q:"Combien de continents existe-t-il ?",answers:["5","6","7","8"],correct:2},
+      {q:"Quelle planète est surnommée la planète rouge ?",answers:["Jupiter","Vénus","Mars","Saturne"],correct:2},
+      {q:"Quel est l'océan le plus vaste ?",answers:["Atlantique","Pacifique","Indien","Arctique"],correct:1},
+      {q:"Quel métal a pour symbole Fe ?",answers:["Cuivre","Or","Argent","Fer"],correct:3},
+      {q:"Quelle est la capitale du Canada ?",answers:["Toronto","Montréal","Ottawa","Vancouver"],correct:2},
+      {q:"Combien de côtés possède un hexagone ?",answers:["5","6","7","8"],correct:1},
+      {q:"Quel pays a inventé la pizza moderne ?",answers:["France","Grèce","Italie","Espagne"],correct:2},
+      {q:"Quel est l'animal terrestre le plus rapide ?",answers:["Lion","Guépard","Antilope","Faucon"],correct:1},
+      {q:"Qui a peint la Joconde ?",answers:["Michel-Ange","Raphaël","Léonard de Vinci","Botticelli"],correct:2},
+      {q:"Quel gaz respirons-nous principalement ?",answers:["Oxygène","CO2","Azote","Argon"],correct:2},
+      {q:"Quel pays possède la plus grande population en 2026 ?",answers:["Chine","USA","Inde","Indonésie"],correct:2},
+      {q:"Quel est le plus long fleuve du monde ?",answers:["Amazone","Congo","Nil","Mississippi"],correct:2},
+      {q:"Combien de cordes possède une guitare classique ?",answers:["4","5","6","7"],correct:2},
+      {q:"Quel scientifique a proposé la théorie de la relativité ?",answers:["Newton","Bohr","Einstein","Tesla"],correct:2},
+      {q:"Quel est le plus petit pays du monde ?",answers:["Monaco","Liechtenstein","Vatican","Saint-Marin"],correct:2},
+      {q:"Quelle langue est la plus parlée par nombre de natifs ?",answers:["Anglais","Espagnol","Hindi","Mandarin"],correct:3},
+      {q:"Quel organe pompe le sang ?",answers:["Les poumons","Le foie","Le cœur","Les reins"],correct:2},
+      {q:"Quel est le satellite naturel de la Terre ?",answers:["Phobos","La Lune","Europe","Titan"],correct:1},
+      {q:"Dans quel pays se trouvent les pyramides de Gizeh ?",answers:["Soudan","Irak","Maroc","Égypte"],correct:3},
+      {q:"Quel est l'animal symbole de l'Australie ?",answers:["Koala","Kangourou","Émeu","Wombat"],correct:1},
+      {q:"Point d'ébullition de l'eau à pression normale ?",answers:["90°C","95°C","100°C","105°C"],correct:2},
+      {q:"Qui a écrit Les Misérables ?",answers:["Zola","Flaubert","Balzac","Victor Hugo"],correct:3},
+      {q:"Quel est le plus grand mammifère du monde ?",answers:["Éléphant","Baleine bleue","Requin baleine","Girafe"],correct:1},
+      {q:"Quel pays est célèbre pour les tulipes et les moulins ?",answers:["Belgique","Danemark","Pays-Bas","Suède"],correct:2},
+      {q:"Quelle planète possède des anneaux très visibles ?",answers:["Jupiter","Uranus","Neptune","Saturne"],correct:3},
+      {q:"Quel continent est le moins peuplé (hors pôles) ?",answers:["Océanie","Arctique","Antarctique","Amérique du Sud"],correct:0},
+      {q:"Quel est le carré de 12 ?",answers:["124","132","144","148"],correct:2},
+      {q:"Quel instrument mesure les tremblements de terre ?",answers:["Baromètre","Hygromètre","Sismographe","Thermomètre"],correct:2},
+      {q:"Quel est le plus grand organe du corps humain ?",answers:["Le foie","Le cerveau","Les poumons","La peau"],correct:3},
+    ]
+  },
+  {
+    name:"Vrai ou Faux 🔥", badge:"badge-pink", type:"tf",
+    questions:[
+      {q:"Les Vikings portaient des casques à cornes.",correct:false,expl:"C'est un mythe popularisé au XIXe siècle."},
+      {q:"Le son voyage plus vite dans l'eau que dans l'air.",correct:true,expl:"~1480 m/s dans l'eau vs ~340 m/s dans l'air."},
+      {q:"Les chauves-souris sont aveugles.",correct:false,expl:"Elles voient, mais utilisent aussi l'écholocalisation."},
+      {q:"Napoléon était extrêmement petit.",correct:false,expl:"1m69, taille normale pour l'époque."},
+      {q:"L'éclair est plus chaud que la surface du Soleil.",correct:true,expl:"~30 000 K vs ~5 500 K pour la surface du Soleil."},
+      {q:"Les tomates sont des fruits.",correct:true,expl:"Botaniquement, oui : elles contiennent des graines."},
+      {q:"La Grande Muraille est visible depuis la Lune.",correct:false,expl:"Trop étroite pour être vue à cette distance."},
+      {q:"L'eau chaude gèle parfois plus vite que l'eau froide.",correct:true,expl:"C'est l'effet Mpemba."},
+      {q:"Les humains utilisent seulement 10% de leur cerveau.",correct:false,expl:"Ce mythe est faux. On utilise toutes nos zones."},
+      {q:"Le Sahara était autrefois une région verte.",correct:true,expl:"Il y a ~5000 ans, il y avait lacs et savane."},
+      {q:"Les requins existaient avant les dinosaures.",correct:true,expl:"Les requins ont ~450 millions d'années."},
+      {q:"Un caméléon change de couleur uniquement pour se camoufler.",correct:false,expl:"C'est aussi pour la communication et la thermorégulation."},
+      {q:"Les bananes sont des baies.",correct:true,expl:"Botaniquement, oui !"},
+      {q:"La Terre est plus proche du Soleil en hiver (hémisphère nord).",correct:true,expl:"En janvier, on est au périhélie."},
+      {q:"Le café déshydrate totalement le corps.",correct:false,expl:"L'effet diurétique est faible à doses normales."},
+      {q:"Les pieuvres ont trois cœurs.",correct:true,expl:"2 branchiales + 1 systémique."},
+      {q:"Le diamant est le matériau naturel le plus dur.",correct:true,expl:"10 sur l'échelle de Mohs."},
+      {q:"Christophe Colomb a découvert l'Amérique.",correct:false,expl:"Les Amérindiens y vivaient, et les Vikings avant lui."},
+      {q:"Le mont Everest grandit encore.",correct:true,expl:"Les plaques tectoniques le poussent vers le haut."},
+      {q:"Les poissons rouges ont une mémoire de 3 secondes.",correct:false,expl:"Ils peuvent se souvenir de choses plusieurs mois."},
+      {q:"Les abeilles peuvent reconnaître des visages humains.",correct:true,expl:"Prouvé expérimentalement."},
+      {q:"Le corps humain possède plus de bactéries que de cellules.",correct:true,expl:"Environ 1:1, voire plus selon les études."},
+      {q:"La foudre peut frapper deux fois au même endroit.",correct:true,expl:"Elle frappe souvent les mêmes points élevés."},
+      {q:"Les pandas mangent principalement du bambou.",correct:true,expl:"Plus de 99% de leur alimentation."},
+      {q:"Les continents bougent encore aujourd'hui.",correct:true,expl:"Quelques centimètres par an via la tectonique."},
+      {q:"Le verre est un liquide très visqueux.",correct:false,expl:"C'est un solide amorphe."},
+      {q:"Jules César était empereur de Rome.",correct:false,expl:"Il était dictateur. Auguste fut le premier empereur."},
+      {q:"La Lune influence les marées.",correct:true,expl:"Via son attraction gravitationnelle."},
+      {q:"Le cerveau ressent la douleur.",correct:false,expl:"Il n'a pas de récepteurs nociceptifs."},
+      {q:"Le premier ordinateur ENIAC était plus puissant qu'un smartphone.",correct:false,expl:"Un smartphone moderne est infiniment plus puissant."},
+    ]
+  },
+  {
+    name:"Cerveau 🧠", badge:"badge-teal", type:"open",
+    questions:[
+      {q:"Pourquoi le ciel devient-il rouge au coucher du soleil ?",correct:"Diffusion de Rayleigh",expl:"La lumière traverse plus d'atmosphère. Les courtes longueurs d'onde (bleu) sont dispersées, laissant le rouge."},
+      {q:"Quelle civilisation a développé le concept du zéro comme nombre ?",correct:"Civilisation indienne",expl:"Brahmagupta (~628 apr. J.-C.) formalisa le zéro comme nombre à part entière."},
+      {q:"Quelle est la différence entre climat et météo ?",correct:"Climat = long terme ; météo = court terme",expl:"Le climat c'est la tendance sur 30+ ans, la météo c'est ce qu'il fait aujourd'hui."},
+      {q:"Pourquoi les astronautes flottent-ils dans l'espace ?",correct:"Chute libre orbitale",expl:"Ils tombent en permanence autour de la Terre mais vont assez vite pour ne jamais toucher le sol."},
+      {q:"Quel phénomène provoque les saisons sur Terre ?",correct:"Inclinaison de l'axe terrestre (23,5°)",expl:"L'axe incliné change l'angle des rayons solaires selon la période de l'année."},
+      {q:"Pourquoi la glace flotte-t-elle sur l'eau ?",correct:"La glace est moins dense que l'eau liquide",expl:"L'eau se dilate en gelant, formant une structure hexagonale moins dense."},
+      {q:"Qu'est-ce qu'un trou noir ?",correct:"Région où la gravité empêche la lumière de s'échapper",expl:"Sa masse est si concentrée que la vitesse de libération dépasse celle de la lumière."},
+      {q:"Pourquoi entend-on le tonnerre après l'éclair ?",correct:"Lumière plus rapide que le son",expl:"La lumière voyage à 300 000 km/s, le son à 340 m/s seulement."},
+      {q:"Quel mécanisme provoque les marées ?",correct:"Gravité de la Lune (et du Soleil)",expl:"La Lune attire les océans, créant deux bosses d'eau opposées."},
+      {q:"Pourquoi le fer rouille-t-il ?",correct:"Oxydation (réaction avec O₂ et H₂O)",expl:"Le fer réagit avec l'oxygène et l'eau pour former de l'oxyde de fer."},
+      {q:"Quel est le rôle principal de l'ADN ?",correct:"Stockage de l'information génétique",expl:"L'ADN contient les instructions pour construire et faire fonctionner un organisme."},
+      {q:"Pourquoi les avions peuvent-ils voler ?",correct:"Différence de pression sur les ailes (portance)",expl:"L'air va plus vite au-dessus de l'aile, créant une dépression qui la soulève."},
+      {q:"Quelle est la différence entre vitesse et accélération ?",correct:"Accélération = variation de la vitesse",expl:"La vitesse mesure le déplacement/temps. L'accélération mesure le changement de vitesse."},
+      {q:"Pourquoi les volcans entrent-ils en éruption ?",correct:"Pression du magma",expl:"Le magma sous pression trouve une fissure et s'échappe en surface."},
+      {q:"Quel est le principe de la sélection naturelle ?",correct:"Survie et reproduction des mieux adaptés",expl:"Les individus mieux adaptés survivent et transmettent leurs gènes."},
+      {q:"Comment fonctionne un vaccin ?",correct:"Il entraîne le système immunitaire",expl:"Il présente un antigène inoffensif pour que le corps apprenne à fabriquer des anticorps."},
+      {q:"Pourquoi voit-on toujours la même face de la Lune ?",correct:"Rotation synchronisée",expl:"La Lune tourne sur elle-même en exactement le même temps qu'elle orbite la Terre."},
+      {q:"Pourquoi les étoiles scintillent-elles ?",correct:"Turbulences atmosphériques",expl:"La lumière traverse des couches d'air à températures différentes qui la dévient."},
+      {q:"Quelle est la différence entre masse et poids ?",correct:"Masse = quantité de matière ; poids = force gravitationnelle",expl:"Votre masse est la même partout ; votre poids est 6× plus faible sur la Lune."},
+      {q:"Pourquoi le pétrole est-il appelé énergie fossile ?",correct:"Provient d'organismes anciens fossilisés",expl:"Il vient de matière organique compressée sur des millions d'années."},
+      {q:"Pourquoi les océans sont-ils salés ?",correct:"Érosion minérale et sels dissous apportés par les fleuves",expl:"Les rivières dissolvent des minéraux des roches et les transportent vers la mer depuis des milliards d'années."},
+      {q:"Pourquoi certains métaux conduisent-ils l'électricité ?",correct:"Présence d'électrons libres",expl:"Les métaux ont des électrons faiblement liés qui se déplacent librement et transportent le courant."},
+      {q:"Quel est le rôle des mitochondries ?",correct:"Produire l'énergie cellulaire (ATP)",expl:"Elles transforment le glucose en ATP, la molécule énergétique universelle."},
+      {q:"Pourquoi les langues évoluent-elles ?",correct:"Influences culturelles, historiques et sociales",expl:"Migrations, contacts entre peuples, innovations technologiques font évoluer les langues."},
+      {q:"Pourquoi les civilisations naissent-elles souvent près des fleuves ?",correct:"Eau, agriculture et transport",expl:"Les fleuves offrent l'eau potable, irriguent les cultures et permettent le commerce."},
+    ]
+  },
+  {
+    name:"Certitudes 😭", badge:"badge-amber", type:"open",
+    questions:[
+      {q:"Quel pays possède le plus de fuseaux horaires ?",correct:"France (12 fuseaux avec ses territoires)",expl:"Grâce à ses territoires d'outre-mer, la France couvre 12 fuseaux horaires."},
+      {q:"Quel est l'animal le plus meurtrier pour l'humain ?",correct:"Le moustique",expl:"Il cause plus de 700 000 morts/an via le paludisme, la dengue, etc."},
+      {q:"Combien de pays compte l'Afrique ?",correct:"54 pays",expl:"54 États reconnus par l'ONU."},
+      {q:"Quel métal est liquide à température ambiante ?",correct:"Mercure",expl:"Le mercure est le seul métal liquide à 20°C."},
+      {q:"Quel empire a duré le plus longtemps dans l'histoire ?",correct:"Empire romain d'Orient / Byzantin (1000+ ans)",expl:"Il a duré plus de 1000 ans, de 330 à 1453 apr. J.-C."},
+      {q:"Quelle est la seule lettre absente du tableau périodique ?",correct:"J",expl:"Aucun symbole chimique ne contient la lettre J."},
+      {q:"Quel est le seul continent sans désert ?",correct:"Europe",expl:"Selon la définition classique des zones arides."},
+      {q:"Quel pays consomme le plus de chocolat par habitant ?",correct:"Suisse",expl:"Environ 10 kg par personne et par an."},
+      {q:"Quel est l'objet le plus parfaitement sphérique connu ?",correct:"Sphère de silicium ultra pure",expl:"Fabriquée pour redéfinir le kilogramme — erreur de 0,3 nm."},
+      {q:"Quel est le plus grand organisme vivant connu ?",correct:"Un champignon géant dans l'Oregon",expl:"Armillaria ostoyae : 9 km², estimé à 8 500 ans."},
+      {q:"Pourquoi les flamants roses sont-ils roses ?",correct:"Pigments caroténoïdes dans leur alimentation",expl:"Les crevettes et algues qu'ils mangent contiennent des caroténoïdes qui colorent leurs plumes."},
+      {q:"Quelle guerre a causé le plus de morts dans l'histoire ?",correct:"Seconde Guerre mondiale",expl:"70 à 85 millions de morts, soit ~3% de la population mondiale."},
+      {q:"Quel pays a le plus d'îles au monde ?",correct:"Suède",expl:"Plus de 220 000 îles recensées."},
+      {q:"Quelle civilisation a construit le Machu Picchu ?",correct:"Les Incas",expl:"Construit au XVe siècle, probablement comme résidence royale."},
+      {q:"Quel est le seul mammifère capable de voler réellement ?",correct:"La chauve-souris",expl:"Les écureuils volants planent, mais ne volent pas."},
+      {q:"Pourquoi les zèbres ont-ils des rayures ?",correct:"Repousser les insectes et thermorégulation",expl:"Les rayures perturbent la vision des mouches tsé-tsé porteuses de maladies."},
+      {q:"Quelle est la température la plus basse possible théoriquement ?",correct:"0 Kelvin = −273,15 °C",expl:"Zéro absolu : aucun mouvement thermique possible."},
+      {q:"Quelle est la capitale la plus haute du monde ?",correct:"La Paz (Bolivie) — 3 600 m",expl:"Siège du gouvernement bolivien, à plus de 3 600 m d'altitude."},
+      {q:"Quel pays n'a officiellement aucun fleuve permanent ?",correct:"Arabie saoudite",expl:"Pas de cours d'eau permanent sur l'ensemble du territoire."},
+      {q:"Pourquoi les pirates portaient-ils parfois un cache-œil ?",correct:"Pour adapter rapidement un œil à l'obscurité",expl:"Un œil resté sous le cache s'adaptait instantanément à l'obscurité des cales."},
+      {q:"Quel est l'endroit le plus sec de la Terre ?",correct:"Désert d'Atacama (Chili)",expl:"Certaines zones n'ont eu aucune pluie mesurable depuis des siècles."},
+      {q:"Quel animal peut survivre dans le vide de l'espace ?",correct:"Le tardigrade",expl:"Il peut supporter le vide, les radiations et des températures extrêmes."},
+      {q:"Quel est le plus ancien langage encore parlé ?",correct:"Tamoul",expl:"Attesté depuis plus de 2 500 ans, toujours parlé par des millions de personnes."},
+      {q:"Quelle invention a fait exploser la diffusion du savoir en Europe ?",correct:"L'imprimerie de Gutenberg (~1450)",expl:"Elle a révolutionné la production de livres et la transmission du savoir."},
+      {q:"Quel peuple a inventé le papier ?",correct:"Les Chinois",expl:"Inventé vers 105 apr. J.-C. par Cai Lun."},
+      {q:"Quel événement a provoqué l'extinction des dinosaures non aviens ?",correct:"Impact d'un astéroïde (Chicxulub)",expl:"Il y a 66 millions d'années, à Chicxulub au Mexique."},
+      {q:"Pourquoi les chats ronronnent-ils ?",correct:"Communication et auto-apaisement",expl:"Aussi bien pour exprimer le bien-être que le stress ou la douleur."},
+    ]
+  }
+];
+
+const MORT_SUBITE = [
+  {q:"Quel nombre romain n'existe pas dans l'Antiquité classique ?",a:"0 (zéro)"},
+  {q:"Quel scientifique est mort l'année de naissance de Galilée ?",a:"Michel-Ange (1564)"},
+  {q:"Quel pays possède le plus de pyramides au monde ?",a:"Soudan (200+)"},
+  {q:"Quel est le seul aliment qui ne se périme presque jamais ?",a:"Le miel"},
+  {q:"Quelle planète tourne couchée sur son axe ?",a:"Uranus"},
+  {q:"Quel animal possède le cerveau le plus gros proportionnellement à son corps ?",a:"La fourmi"},
+  {q:"Quelle mer n'est en réalité pas une mer ?",a:"La mer Caspienne (c'est un lac)"},
+  {q:"Quel est l'objet le plus dense naturellement accessible sur Terre ?",a:"L'osmium"},
+  {q:"Quel est le seul pays avec un drapeau non rectangulaire ?",a:"Le Népal"},
+  {q:"Quel est le plus grand volcan du système solaire ?",a:"Olympus Mons (Mars)"},
+];
+
+const AVATAR_COLORS = [
+  {bg:"rgba(124,58,237,0.3)",color:"#c4b5fd"},
+  {bg:"rgba(6,182,212,0.3)",color:"#67e8f9"},
+  {bg:"rgba(245,158,11,0.3)",color:"#fcd34d"},
+  {bg:"rgba(236,72,153,0.3)",color:"#f9a8d4"},
+  {bg:"rgba(16,185,129,0.3)",color:"#6ee7b7"},
+  {bg:"rgba(239,68,68,0.3)",color:"#fca5a5"},
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let S = {
+  mode: 'solo', players: [], currentPlayerIdx: 0,
+  questions: [], currentQ: 0, scores: {},
+  answered: false, timerInterval: null, timeLeft: 20,
+  online: { role: null, code: null, playerId: null, room: null, poll: null, lastStatus: null, answeredQ: -1 },
+  msIdx: 0,
+};
+
+// ============================================================
+// SCREENS
+// ============================================================
+function showScreen(id) {
+  clearInterval(S.timerInterval);
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goHome() {
+  stopOnlinePoll();
+  S.players = [];
+  S.online = { role: null, code: null, playerId: null, room: null, poll: null, lastStatus: null, answeredQ: -1 };
+  showScreen('screen-welcome');
+}
+
+// ============================================================
+// SETUP
+// ============================================================
+function setMode(m) {
+  S.mode = m;
+  document.getElementById('tab-solo').classList.toggle('active', m==='solo');
+  document.getElementById('tab-multi').classList.toggle('active', m==='multi');
+  document.getElementById('solo-setup').style.display = m==='solo' ? '' : 'none';
+  document.getElementById('multi-setup').style.display = m==='multi' ? '' : 'none';
+}
+
+function addPlayer() {
+  const inp = document.getElementById('new-player');
+  const n = inp.value.trim();
+  if(!n || S.players.length >= 8) return;
+  S.players.push(n); inp.value = '';
+  renderPlayers();
+}
+
+function renderPlayers() {
+  document.getElementById('player-list').innerHTML = S.players.map((p,i) => {
+    const ac = AVATAR_COLORS[i % AVATAR_COLORS.length];
+    return `<div class="player-row">
+      <div class="avatar" style="background:${ac.bg}; color:${ac.color};">${p.slice(0,2).toUpperCase()}</div>
+      <span style="flex:1; font-weight:600; font-size:15px;">${p}</span>
+      <button onclick="removePlayer(${i})" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:20px;padding:4px 8px;">×</button>
+    </div>`;
+  }).join('');
+}
+
+function removePlayer(i) { S.players.splice(i,1); renderPlayers(); }
+
+function shuffle(arr) { return [...arr].sort(() => Math.random()-0.5); }
+
+function buildQuestions(mancheVal, count) {
+  let qs = [];
+  if(mancheVal === 'all') {
+    MANCHES.forEach((m,mi) => qs.push(...m.questions.map(q => ({...q, mType:m.type, mIdx:mi, mBadge:m.badge, mName:m.name}))));
+    qs = shuffle(qs);
+  } else {
+    const mi = parseInt(mancheVal);
+    const m = MANCHES[mi];
+    qs = shuffle(m.questions).map(q => ({...q, mType:m.type, mIdx:mi, mBadge:m.badge, mName:m.name}));
+  }
+  return qs.slice(0, Math.min(count, qs.length));
+}
+
+function startSolo() {
+  const name = document.getElementById('player-name').value.trim() || 'Joueur';
+  const mancheVal = document.getElementById('manche-select').value;
+  const count = parseInt(document.getElementById('count-select').value);
+  S.players = [name]; S.scores = {[name]:0};
+  S.currentPlayerIdx = 0; S.currentQ = 0;
+  S.questions = buildQuestions(mancheVal, count);
+  showScreen('screen-question'); loadQuestion();
+}
+
+function startMulti() {
+  if(S.players.length < 2) { alert('Ajoutez au moins 2 joueurs !'); return; }
+  const mancheVal = document.getElementById('manche-select-multi').value;
+  const count = parseInt(document.getElementById('count-select-multi').value);
+  S.scores = {}; S.players.forEach(p => S.scores[p] = 0);
+  S.currentPlayerIdx = 0; S.currentQ = 0;
+  S.questions = buildQuestions(mancheVal, count);
+  showScreen('screen-question'); loadQuestion();
+}
+
+// ============================================================
+// QUIZ ENGINE
+// ============================================================
+function loadQuestion() {
+  S.answered = false;
+  clearInterval(S.timerInterval);
+  const q = S.questions[S.currentQ];
+  const total = S.questions.length;
+  const player = S.players[S.currentPlayerIdx % S.players.length];
+
+  document.getElementById('q-counter').textContent = `Q ${S.currentQ+1}/${total}`;
+  const badge = document.getElementById('q-manche-badge');
+  badge.className = `badge ${q.mBadge}`;
+  badge.textContent = q.mName;
+  document.getElementById('q-score').textContent = (S.scores[player] || 0) + ' pts';
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('feedback-area').style.display = 'none';
+  document.getElementById('expl-card').style.display = 'none';
+
+  const turnWrap = document.getElementById('turn-card-wrap');
+  if(S.players.length > 1) {
+    turnWrap.style.display = '';
+    const ac = AVATAR_COLORS[S.currentPlayerIdx % AVATAR_COLORS.length];
+    const av = document.getElementById('turn-avatar');
+    av.style.background = ac.bg; av.style.color = ac.color;
+    av.textContent = player.slice(0,2).toUpperCase();
+    document.getElementById('turn-name').textContent = player;
+  } else { turnWrap.style.display = 'none'; }
+
+  const container = document.getElementById('answers-container');
+  const timerMax = q.mType === 'open' ? 60 : 20;
+  S.timeLeft = timerMax;
+
+  if(q.mType === 'qcm') {
+    const cls = ['ans-a','ans-b','ans-c','ans-d'];
+    container.innerHTML = `<div class="ans-grid">${q.answers.map((a,i) =>
+      `<button class="ans-btn ${cls[i]}" onclick="answerQCM(${i})" id="ans-${i}">${a}</button>`).join('')}</div>`;
+  } else if(q.mType === 'tf') {
+    container.innerHTML = `<div class="tf-grid">
+      <button class="tf-btn tf-vrai" onclick="answerTF(true)">✓ Vrai</button>
+      <button class="tf-btn tf-faux" onclick="answerTF(false)">✗ Faux</button>
+    </div>`;
+  } else {
+    container.innerHTML = `<div style="text-align:center; padding:12px 0;">
+      <p style="font-size:13px; margin-bottom:14px;">Réfléchis, puis révèle la réponse</p>
+      <button class="btn btn-primary" onclick="revealOpen()" style="max-width:220px; margin:0 auto;">👁 Révéler la réponse</button>
+    </div>`;
+  }
+
+  updateTimerUI(timerMax, timerMax);
+  const timerWrap = document.getElementById('timer-wrap');
+  timerWrap.classList.remove('timer-low');
+  S.timerInterval = setInterval(() => {
+    S.timeLeft--;
+    updateTimerUI(S.timeLeft, timerMax);
+    if(S.timeLeft <= 5) timerWrap.classList.add('timer-low');
+    if(S.timeLeft <= 0) { clearInterval(S.timerInterval); if(!S.answered) timeOut(); }
+  }, 1000);
+}
+
+function updateTimerUI(t, max) {
+  document.getElementById('timer-fill').style.width = (t/max*100)+'%';
+  document.getElementById('timer-label').textContent = t;
+}
+
+function timeOut() {
+  S.answered = true;
+  showFeedback(false, 0, null);
+}
+
+function answerQCM(idx) {
+  if(S.answered) return;
+  S.answered = true; clearInterval(S.timerInterval);
+  const q = S.questions[S.currentQ];
+  const correct = idx === q.correct;
+  const pts = correct ? Math.round(500 + S.timeLeft * 50) : 0;
+  addScore(pts);
+  document.querySelectorAll('.ans-btn').forEach((btn, i) => {
+    if(i === q.correct) btn.classList.add('ans-correct');
+    else if(i === idx && !correct) btn.classList.add('ans-wrong');
+    else btn.classList.add('ans-reveal');
+    btn.disabled = true;
+  });
+  showFeedback(correct, pts, q.expl);
+}
+
+function answerTF(val) {
+  if(S.answered) return;
+  S.answered = true; clearInterval(S.timerInterval);
+  const q = S.questions[S.currentQ];
+  const correct = val === q.correct;
+  const pts = correct ? Math.round(500 + S.timeLeft * 50) : 0;
+  addScore(pts);
+  document.querySelectorAll('.tf-btn').forEach(btn => {
+    const isCorrect = (btn.classList.contains('tf-vrai') && q.correct) || (btn.classList.contains('tf-faux') && !q.correct);
+    if(isCorrect) btn.classList.add('ans-correct');
+    else btn.classList.add('ans-reveal');
+    btn.disabled = true;
+  });
+  showFeedback(correct, pts, q.expl);
+}
+
+function revealOpen() {
+  if(S.answered) return;
+  S.answered = true; clearInterval(S.timerInterval);
+  const q = S.questions[S.currentQ];
+  const container = document.getElementById('answers-container');
+  container.innerHTML = `<div class="reveal-answer pop">
+    <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); font-weight:600;">Réponse attendue</div>
+    <div class="ms-a" style="margin-top:6px;">${q.correct}</div>
+  </div>`;
+  showFeedback(null, 0, q.expl);
+}
+
+function addScore(pts) {
+  const player = S.players[S.currentPlayerIdx % S.players.length];
+  S.scores[player] = (S.scores[player] || 0) + pts;
+  document.getElementById('q-score').textContent = S.scores[player] + ' pts';
+}
+
+function showFeedback(correct, pts, expl) {
+  const area = document.getElementById('feedback-area');
+  const banner = document.getElementById('result-banner');
+  const ptsEl = document.getElementById('result-pts');
+  const labelEl = document.getElementById('result-label');
+  const explCard = document.getElementById('expl-card');
+
+  area.style.display = '';
+  area.classList.add('pop');
+  setTimeout(() => area.classList.remove('pop'), 400);
+
+  if(correct === null) {
+    banner.className = 'result-banner neutral';
+    ptsEl.style.color = 'var(--text)';
+    ptsEl.textContent = '🤔 Auto-évaluation';
+    labelEl.style.color = 'var(--muted)';
+    labelEl.textContent = 'Avais-tu la bonne réponse ?';
+  } else {
+    banner.className = `result-banner ${correct ? 'correct' : 'wrong'}`;
+    ptsEl.textContent = correct ? `+${pts} pts` : '0 pt';
+    labelEl.textContent = correct ? '✓ Bonne réponse !' : '✗ Raté !';
+  }
+
+  if(expl) { explCard.style.display = ''; document.getElementById('expl-text').textContent = expl; }
+
+  const isLast = S.currentQ >= S.questions.length - 1;
+  document.getElementById('next-btn').textContent = isLast ? '🏆 Voir les résultats' : 'Question suivante →';
+}
+
+function nextQuestion() {
+  S.currentQ++;
+  if(S.currentQ >= S.questions.length) { showResults(); return; }
+  S.currentPlayerIdx++;
+  loadQuestion();
+}
+
+// ============================================================
+// RESULTS
+// ============================================================
+function showResults() {
+  showScreen('screen-results');
+  const sorted = Object.entries(S.scores).sort((a,b) => b[1]-a[1]);
+  const medals = ['🥇','🥈','🥉'];
+
+  document.getElementById('leaderboard').innerHTML = sorted.map(([name, score], i) => {
+    const ac = AVATAR_COLORS[S.players.indexOf(name) % AVATAR_COLORS.length];
+    return `<div class="score-row">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span class="medal">${medals[i] || (i+1+'.')}</span>
+        <div class="avatar" style="background:${ac.bg}; color:${ac.color}; font-size:13px;">${name.slice(0,2).toUpperCase()}</div>
+        <span style="font-family:'Syne',sans-serif; font-weight:700; font-size:15px;">${name}</span>
+      </div>
+      <span style="font-family:'Syne',sans-serif; font-weight:800; font-size:18px;">${score}</span>
+    </div>`;
+  }).join('');
+
+  const winner = sorted[0];
+  document.getElementById('trophy-emoji').textContent = winner[1] > S.questions.length * 400 ? '🏆' : '🎯';
+  if(sorted.length === 1) {
+    document.getElementById('results-title').textContent = winner[0];
+    document.getElementById('results-sub').textContent = `${winner[1]} pts · ${S.questions.length} questions`;
+  } else {
+    document.getElementById('results-title').textContent = winner[0] + ' gagne !';
+    document.getElementById('results-sub').textContent = `${winner[1]} pts`;
+  }
+  document.getElementById('stats-zone').innerHTML = '';
+}
+
+// ============================================================
+// ONLINE KAHOOT-STYLE ROOMS
+// ============================================================
+async function api(path, options = {}) {
+  const res = await fetch(path, {
+    ...options,
+    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+  });
+  const data = await res.json().catch(() => ({}));
+  if(!res.ok) throw new Error(data.error || 'Erreur serveur');
+  return data;
+}
+
+function stopOnlinePoll() {
+  if(S.online && S.online.poll) clearInterval(S.online.poll);
+  if(S.online) S.online.poll = null;
+}
+
+function startOnlinePoll() {
+  stopOnlinePoll();
+  pollOnlineRoom();
+  S.online.poll = setInterval(pollOnlineRoom, 800);
+}
+
+function onlineRoomUrl() {
+  const qs = S.online.playerId ? `?playerId=${encodeURIComponent(S.online.playerId)}` : '';
+  return `/api/rooms/${S.online.code}${qs}`;
+}
+
+async function createOnlineRoom() {
+  try {
+    const mancheVal = document.getElementById('online-manche-select').value;
+    const count = parseInt(document.getElementById('online-count-select').value);
+    const questions = buildQuestions(mancheVal, count);
+    const room = await api('/api/rooms', { method:'POST', body: JSON.stringify({ questions }) });
+    S.online = { role:'host', code:room.code, playerId:null, room, poll:null, lastStatus:null, answeredQ:-1 };
+    renderOnlineLobby(room);
+    showScreen('screen-online-lobby');
+    startOnlinePoll();
+  } catch(err) {
+    alert("Impossible de creer la partie. Lancez d'abord le serveur avec: npm start");
+  }
+}
+
+async function joinOnlineRoom() {
+  const name = document.getElementById('online-player-name').value.trim() || 'Joueur';
+  const code = (document.getElementById('online-room-code').value || document.getElementById('join-code').value).trim();
+  if(!/^\d{6}$/.test(code)) { alert('Entre un code a 6 chiffres.'); return; }
+  try {
+    const data = await api(`/api/rooms/${code}/join`, { method:'POST', body: JSON.stringify({ name }) });
+    S.online = { role:'player', code, playerId:data.player.id, room:data.room, poll:null, lastStatus:null, answeredQ:-1 };
+    renderOnlineLobby(data.room);
+    showScreen('screen-online-lobby');
+    startOnlinePoll();
+  } catch(err) {
+    alert(err.message);
+  }
+}
+
+async function pollOnlineRoom() {
+  if(!S.online.code) return;
+  try {
+    const room = await api(onlineRoomUrl());
+    S.online.room = room;
+    renderOnlineState(room);
+  } catch(err) {
+    stopOnlinePoll();
+    alert(err.message);
+  }
+}
+
+async function startOnlineRoom() {
+  if(S.online.role !== 'host') return;
+  try {
+    const room = await api(`/api/rooms/${S.online.code}/start`, { method:'POST', body:'{}' });
+    S.online.room = room;
+    renderOnlineState(room);
+  } catch(err) {
+    alert(err.message);
+  }
+}
+
+async function revealOnlineRoom() {
+  if(S.online.role !== 'host') return;
+  const room = await api(`/api/rooms/${S.online.code}/reveal`, { method:'POST', body:'{}' });
+  S.online.room = room;
+  renderOnlineState(room);
+}
+
+async function nextOnlineQuestion() {
+  if(S.online.role !== 'host') return;
+  const room = await api(`/api/rooms/${S.online.code}/next`, { method:'POST', body:'{}' });
+  S.online.room = room;
+  renderOnlineState(room);
+}
+
+async function answerOnline(answer) {
+  const room = S.online.room;
+  if(!room || S.online.role !== 'player' || room.status !== 'question' || room.myAnswer) return;
+  try {
+    const next = await api(`/api/rooms/${S.online.code}/answer`, {
+      method:'POST',
+      body: JSON.stringify({ playerId:S.online.playerId, answer, timeLeft:S.timeLeft })
+    });
+    S.online.room = next;
+    renderOnlineState(next);
+  } catch(err) {
+    alert(err.message);
+  }
+}
+
+function renderOnlineState(room) {
+  if(room.status === 'lobby') {
+    renderOnlineLobby(room);
+    if(!document.getElementById('screen-online-lobby').classList.contains('active')) showScreen('screen-online-lobby');
+    return;
+  }
+  if(room.status === 'results') {
+    showOnlineResults(room);
+    return;
+  }
+  if(room.status === 'question' || room.status === 'reveal') {
+    renderOnlineQuestion(room);
+  }
+}
+
+function renderOnlineLobby(room) {
+  document.getElementById('online-room-display').textContent = room.code;
+  document.getElementById('online-lobby-title').textContent = S.online.role === 'host' ? 'Salle hote' : 'Salle joueur';
+  document.getElementById('online-lobby-sub').textContent = S.online.role === 'host' ? 'Affiche ce code aux joueurs.' : "Attends que l'hote demarre.";
+  document.getElementById('online-start-btn').style.display = S.online.role === 'host' ? '' : 'none';
+  document.getElementById('online-player-list').innerHTML = room.players.map((p,i) => playerLine(p, i)).join('') || '<p>Aucun joueur connecte.</p>';
+}
+
+function renderOnlineQuestion(room) {
+  const q = room.question;
+  const me = room.me;
+  const answered = Boolean(room.myAnswer);
+  const key = `${room.status}-${room.currentQ}-${S.online.role}-${answered}`;
+  document.getElementById('online-q-counter').textContent = `Q ${room.currentQ+1}/${room.total}`;
+  const badge = document.getElementById('online-q-badge');
+  badge.className = `badge ${q.mBadge}`;
+  badge.textContent = q.mName;
+  document.getElementById('online-my-score').textContent = S.online.role === 'host' ? `${room.answeredCount}/${room.players.length}` : `${(me && me.score) || 0} pts`;
+  document.getElementById('online-answer-count').textContent = `${room.answeredCount}/${room.players.length} reponses`;
+  document.getElementById('online-host-controls').style.display = S.online.role === 'host' ? '' : 'none';
+  document.querySelector('#online-host-controls .btn-primary').textContent = room.currentQ >= room.total - 1 ? 'Voir les resultats' : 'Question suivante';
+
+  if(S.online.renderKey === key) return;
+  S.online.renderKey = key;
+  showScreen('screen-online-question');
+  document.getElementById('online-q-text').textContent = q.q;
+
+  const container = document.getElementById('online-answers-container');
+  if(q.mType === 'qcm') {
+    const cls = ['ans-a','ans-b','ans-c','ans-d'];
+    container.innerHTML = `<div class="ans-grid">${q.answers.map((a,i) => {
+      const isCorrect = room.status === 'reveal' && i === q.correct;
+      const disabled = S.online.role === 'host' || answered || room.status === 'reveal';
+      return `<button class="ans-btn ${cls[i]} ${isCorrect ? 'ans-correct' : ''}" ${disabled ? 'disabled' : ''} onclick="answerOnline(${i})">${escapeHTML(a)}</button>`;
+    }).join('')}</div>`;
+  } else if(q.mType === 'tf') {
+    const disabled = S.online.role === 'host' || answered || room.status === 'reveal';
+    container.innerHTML = `<div class="tf-grid">
+      <button class="tf-btn tf-vrai ${room.status === 'reveal' && q.correct ? 'ans-correct' : ''}" ${disabled ? 'disabled' : ''} onclick="answerOnline(true)">Vrai</button>
+      <button class="tf-btn tf-faux ${room.status === 'reveal' && !q.correct ? 'ans-correct' : ''}" ${disabled ? 'disabled' : ''} onclick="answerOnline(false)">Faux</button>
+    </div>`;
+  } else {
+    if(room.status === 'reveal') {
+      container.innerHTML = `<div class="reveal-answer pop">
+        <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); font-weight:600;">Reponse attendue</div>
+        <div class="ms-a" style="margin-top:6px;">${escapeHTML(q.correct)}</div>
+      </div>`;
+    } else if(S.online.role === 'host') {
+      container.innerHTML = `<div class="waiting-panel card">
+        <h2>Question ouverte</h2>
+        <p>Les joueurs reflechissent. Affiche la reponse quand le temps est ecoule.</p>
+      </div>`;
+    } else {
+      container.innerHTML = `<div class="waiting-panel card">
+        <h2>Reflechis</h2>
+        <p>L'hote revelera la reponse.</p>
+      </div>`;
+    }
+  }
+
+  if(room.status === 'reveal') {
+    const extra = q.expl ? `<div class="expl-card" style="margin-top:12px;"><p>${escapeHTML(q.expl)}</p></div>` : '';
+    container.insertAdjacentHTML('beforeend', extra);
+  }
+  startOnlineTimer(room);
+}
+
+function startOnlineTimer(room) {
+  clearInterval(S.timerInterval);
+  const max = room.question.mType === 'open' ? 60 : 20;
+  S.timeLeft = max;
+  updateOnlineTimer(max, max);
+  document.getElementById('online-timer-wrap').classList.remove('timer-low');
+  if(room.status !== 'question') return;
+  S.timerInterval = setInterval(() => {
+    S.timeLeft--;
+    updateOnlineTimer(S.timeLeft, max);
+    if(S.timeLeft <= 5) document.getElementById('online-timer-wrap').classList.add('timer-low');
+    if(S.timeLeft <= 0) {
+      clearInterval(S.timerInterval);
+      if(S.online.role === 'player') answerOnline(null);
+      if(S.online.role === 'host') revealOnlineRoom();
+    }
+  }, 1000);
+}
+
+function updateOnlineTimer(t, max) {
+  document.getElementById('online-timer-fill').style.width = (Math.max(0, t)/max*100)+'%';
+  document.getElementById('online-timer-label').textContent = Math.max(0, t);
+}
+
+function showOnlineResults(room) {
+  clearInterval(S.timerInterval);
+  showScreen('screen-results');
+  const sorted = [...room.players].sort((a,b) => b.score - a.score);
+  const medals = ['🥇','🥈','🥉'];
+  document.getElementById('leaderboard').innerHTML = sorted.map((p,i) => playerScoreLine(p, i, medals)).join('');
+  const winner = sorted[0];
+  document.getElementById('trophy-emoji').textContent = '🏆';
+  document.getElementById('results-title').textContent = winner ? `${winner.name} gagne !` : 'Partie terminee';
+  document.getElementById('results-sub').textContent = winner ? `${winner.score} pts · ${room.total} questions` : '';
+  document.getElementById('stats-zone').innerHTML = '';
+}
+
+function playerLine(p, i) {
+  const ac = AVATAR_COLORS[i % AVATAR_COLORS.length];
+  return `<div class="mini-player">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <div class="avatar" style="background:${ac.bg}; color:${ac.color};">${escapeHTML(p.name.slice(0,2).toUpperCase())}</div>
+      <span style="font-weight:700;">${escapeHTML(p.name)}</span>
+    </div>
+    <span class="badge ${p.answered ? 'badge-teal' : 'badge-purple'}">${p.answered ? 'OK' : 'Pret'}</span>
+  </div>`;
+}
+
+function playerScoreLine(p, i, medals) {
+  const ac = AVATAR_COLORS[i % AVATAR_COLORS.length];
+  return `<div class="score-row">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <span class="medal">${medals[i] || (i+1+'.')}</span>
+      <div class="avatar" style="background:${ac.bg}; color:${ac.color}; font-size:13px;">${escapeHTML(p.name.slice(0,2).toUpperCase())}</div>
+      <span style="font-family:'Syne',sans-serif; font-weight:700; font-size:15px;">${escapeHTML(p.name)}</span>
+    </div>
+    <span style="font-family:'Syne',sans-serif; font-weight:800; font-size:18px;">${p.score}</span>
+  </div>`;
+}
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+}
+
+// ============================================================
+// MORT SUBITE
+// ============================================================
+function goMortSubite() {
+  S.msIdx = Math.floor(Math.random() * MORT_SUBITE.length);
+  loadMS();
+  showScreen('screen-mort-subite');
+}
+
+function loadMS() {
+  const ms = MORT_SUBITE[S.msIdx % MORT_SUBITE.length];
+  document.getElementById('ms-q').textContent = ms.q;
+  document.getElementById('ms-a').textContent = ms.a;
+  document.getElementById('ms-answer-wrap').style.display = 'none';
+}
+
+function revealMS() { document.getElementById('ms-answer-wrap').style.display = ''; }
+function nextMS() { S.msIdx++; loadMS(); }
+</script>
+</body>
+</html>
